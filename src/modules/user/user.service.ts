@@ -1,4 +1,4 @@
-import { bcrypt } from '../../config';
+import { bcrypT } from '../../config';
 import db from '../../config/db';
 import IUserPayload from './IUserPayload';
 
@@ -15,7 +15,7 @@ const createUser = async (payload: IUserPayload) => {
   } = payload;
 
   // Hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypT.hash(password, 10);
 
   try {
     const result = await db.query(

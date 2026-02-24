@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import { userService } from './user.service';
 
 const userPost = async (req: Request, res: Response) => {
+
   try {
     const user = await userService.createUser(req.body);
+    console.log('User in Create post', user);
 
     if (!user) {
       return res.status(404).json({
@@ -18,7 +20,7 @@ const userPost = async (req: Request, res: Response) => {
       data: user,
     });
   } catch (e: any) {
-    console.error('Error in userPost:', e);
+    // console.error('Error in userPost:', e);
     return res.status(500).json({
       success: false,
       message: e.message,
