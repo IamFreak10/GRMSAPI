@@ -3,6 +3,7 @@ import cors from 'cors';
 import { userRoutes } from './modules/user/user.routes';
 import { uploadRoute } from './modules/upload/upload.routes';
 import { authRoutes } from './modules/auth/auth.routes';
+import { roomRoutes } from './modules/rooms/rooms.routes';
 export const app = express();
 
 // parser
@@ -25,6 +26,8 @@ app.use('/users', userRoutes);
 app.use('/upload', uploadRoute);
 // authroutes
 app.use('/auth', authRoutes);
+// rooms
+app.use('/rooms', roomRoutes);
 app.get('/', (req, res) => {
   res.send('GRMS API Root');
 });
