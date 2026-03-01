@@ -106,8 +106,31 @@ const completeBookingProcess = async (txnId: string) => {
 
   return { success: true };
 };
+
+const getMyBookings = async (userId: string) => {
+  const query = `
+    SELECT 
+        b.id,
+        b.check_in,
+        b.check_out,
+        b.total_amount,
+        b.payment_status,
+        b.transaction_id,
+        b.booking_date,
+        r.room_no,
+        r.branch,
+        r.type as room_type
+    FROM bookings b
+    JOIN rooms r ON b.room_id = r.id
+    WHERE b.user_id = $1
+    ORDER BY b.booking_date DESC`;
+
+  const result = await db.query(query, [userId]);
+  return result.rows;
+};
 export const bookingServices = {
   initiatePayment,
   createBooking,
   completeBookingProcess,
+  getMyBookings,
 };

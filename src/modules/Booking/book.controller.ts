@@ -39,7 +39,25 @@ const paymentSuccess = async (req: Request, res: Response) => {
     res.redirect(`${config.frontend_url}/payment-failed`);
   }
 };
+
+const getMyBookings = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const result = await bookingServices.getMyBookings(userId as string);
+    return res.status(200).json({
+      success: true,
+      message: 'Bookings fetched successfully',
+      data: result,
+    });
+  } catch (e: any) {
+    return res.status(500).json({
+      success: false,
+      message: e.message || 'Internal Server Error',
+    });
+  }
+};
 export const bookController = {
   bookNPayment,
   paymentSuccess,
+  getMyBookings,
 };
