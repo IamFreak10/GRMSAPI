@@ -4,6 +4,7 @@ import { userRoutes } from './modules/user/user.routes';
 import { uploadRoute } from './modules/upload/upload.routes';
 import { authRoutes } from './modules/auth/auth.routes';
 import { roomRoutes } from './modules/rooms/rooms.routes';
+import { bookRoutes } from './modules/Booking/book.routes';
 export const app = express();
 
 // parser
@@ -28,6 +29,9 @@ app.use('/upload', uploadRoute);
 app.use('/auth', authRoutes);
 // rooms
 app.use('/rooms', roomRoutes);
+
+//booking
+app.use('/booking', bookRoutes);
 app.get('/', (req, res) => {
   res.send('GRMS API Root');
 });
