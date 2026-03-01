@@ -6,7 +6,7 @@ const auth = (...roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
-      console.log('token:',token);
+      
       if (!token) {
         return res.status(500).json({
           message: 'You are not authenticated',
@@ -17,7 +17,7 @@ const auth = (...roles: string[]) => {
         config.jwtsecret as string
       ) as JwtPayload;
       req.user = decodedToken;
-      console.log(req.user);
+      
       if (!roles.includes(decodedToken.role)) {
         return res.status(403).json({
           sucess: false,

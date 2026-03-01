@@ -24,7 +24,7 @@ const loginUser = async (email: string, password: string) => {
       expiresIn: '7d',
     }
   );
-  console.log(token, user);
+
   return{token,user}
 };
 

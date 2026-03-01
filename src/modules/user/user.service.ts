@@ -29,7 +29,7 @@ const createUser = async (payload: IUserPayload) => {
     // Return single row directly
     return result.rows[0];
   } catch (error) {
-    console.error('Error in createUser:', error);
+    
     throw error;
   }
 };

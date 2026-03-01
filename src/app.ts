@@ -7,6 +7,7 @@ import { roomRoutes } from './modules/rooms/rooms.routes';
 import { bookRoutes } from './modules/Booking/book.routes';
 export const app = express();
 
+app.use(express.urlencoded());
 // parser
 app.use(express.json());
 // app.use(express.json()) এর ঠিক নিচে এটি যোগ করুন
@@ -17,7 +18,7 @@ app.use((req, res, next) => {
 });
 app.use(
   cors({
-    origin: true, // এটি সাময়িকভাবে সব অরিজিন এলাউ করবে
+    origin: true,
     credentials: true,
   })
 );

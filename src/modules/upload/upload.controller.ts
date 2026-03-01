@@ -33,7 +33,7 @@ const uploadImages = (req: Request, res: Response) => {
     
     return res.status(200).json({ success: true, urls });
   } catch (error: any) {
-    console.error("Error in image upload:", error);
+    
     return res.status(500).json({ success: false, message: error.message });
   }
 };
