@@ -6,6 +6,8 @@ import { authRoutes } from './modules/auth/auth.routes';
 import { roomRoutes } from './modules/rooms/rooms.routes';
 import { bookRoutes } from './modules/Booking/book.routes';
 import loger from './middlewares/loger';
+import { docRoutes } from './modules/doc/doc.routes';
+import { mailRoutes } from './modules/mail/email.routes';
 export const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -34,6 +36,12 @@ app.use('/rooms', roomRoutes);
 
 //booking
 app.use('/booking', bookRoutes);
+
+// Goole drive api
+app.use('/upload-doc', loger, docRoutes);
+
+// Send email to user
+app.use('/send-reminder', mailRoutes);
 app.get('/', (req, res) => {
   res.send('GRMS API Root');
 });

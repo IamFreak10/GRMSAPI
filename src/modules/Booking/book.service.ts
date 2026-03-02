@@ -2,6 +2,7 @@ import axios from 'axios';
 import qs from 'qs';
 import db from '../../config/db';
 import config from '../../config';
+import { emailService } from '../mail/email.service';
 
 const createBooking = async (paymentData: any, trnxid: string) => {
   // ১. একই ট্রানজ্যাকশন আইডি দিয়ে ডাটাবেসে পেন্ডিং বুকিং ক্রিয়েট
@@ -114,7 +115,21 @@ const completeBookingProcess = async (txnId: string) => {
     );
     currentDate.setDate(currentDate.getDate() + 1);
   }
+  const userResult = await db.query(
+    'SELECT name, email FROM users WHERE id = $1',
+    [booking.user_id]
+  );
+  const user = userResult.rows[0];
 
+  // ২. ইনভয়েস ডেটা সাজিয়ে মেইল পাঠানো
+  if (user) {
+    emailService
+      .sendUploadReminderMail(user.email, user.name, {
+        transaction_id: txnId,
+        total_amount: booking.total_amount,
+      })
+      .catch((err) => console.error('Mail Error:', err));
+  }
   return { success: true };
 };
 
