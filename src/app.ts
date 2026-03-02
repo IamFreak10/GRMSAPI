@@ -8,6 +8,8 @@ import { bookRoutes } from './modules/Booking/book.routes';
 import loger from './middlewares/loger';
 import { docRoutes } from './modules/doc/doc.routes';
 import { mailRoutes } from './modules/mail/email.routes';
+import passport from 'passport';
+import './config/passport.config';
 export const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -25,6 +27,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(passport.initialize());
 // User routes
 app.use('/users', userRoutes);
 // Upload API

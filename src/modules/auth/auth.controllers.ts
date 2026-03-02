@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { authService } from './auth.service';
+import config from '../../config';
+import jwt from 'jsonwebtoken';
 
 const userLogin = async (req: Request, res: Response) => {
   try {
@@ -26,6 +28,54 @@ const userLogin = async (req: Request, res: Response) => {
   }
 };
 
+// auth.controllers.ts
+// auth.controllers.ts
+const googleLoginSuccess = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as any; 
+
+    if (!user) {
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/login?error=auth_failed`
+      );
+    }
+
+    
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      config.jwtsecret as string,
+      { expiresIn: '7d' }
+    );
+
+    
+    const userData = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      gender: user.gender, // এই যে এখন আসবে
+      age: user.age,
+      phone: user.phone,
+      photo_url: user.photo_url,
+      is_active: user.is_active,
+    };
+
+    const userJson = encodeURIComponent(JSON.stringify(userData));
+
+    // রিডাইরেক্ট
+    res.redirect(
+      `${process.env.FRONTEND_URL}/login-success?token=${token}&user=${userJson}`
+    );
+  } catch (err) {
+    console.error('Redirect error:', err);
+    res.redirect(`${process.env.FRONTEND_URL}/login?error=server_error`);
+  }
+};
 export const authController = {
   userLogin,
+  googleLoginSuccess,
 };
