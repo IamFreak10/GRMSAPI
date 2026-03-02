@@ -5,9 +5,10 @@ import { uploadRoute } from './modules/upload/upload.routes';
 import { authRoutes } from './modules/auth/auth.routes';
 import { roomRoutes } from './modules/rooms/rooms.routes';
 import { bookRoutes } from './modules/Booking/book.routes';
+import loger from './middlewares/loger';
 export const app = express();
 
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 // parser
 app.use(express.json());
 // app.use(express.json()) এর ঠিক নিচে এটি যোগ করুন
@@ -25,7 +26,7 @@ app.use(
 // User routes
 app.use('/users', userRoutes);
 // Upload API
-app.use('/upload', uploadRoute);
+app.use('/upload', loger, uploadRoute);
 // authroutes
 app.use('/auth', authRoutes);
 // rooms

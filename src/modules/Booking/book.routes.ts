@@ -4,7 +4,7 @@ import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.post('/create-ssl-payment', auth('user'), bookController.bookNPayment);
+router.post('/create-ssl-payment', bookController.bookNPayment);
 router.post('/payment/success', bookController.paymentSuccess);
 
 // get successful Bookings

@@ -1,5 +1,6 @@
 import express from 'express';
 import { parser, uploadImages } from './upload.controller';
+import loger from '../../middlewares/loger';
 
 const router = express.Router();
 

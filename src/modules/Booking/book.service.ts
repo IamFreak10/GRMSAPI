@@ -41,7 +41,7 @@ const initiatePayment = async (paymentData: any, trnxid: string) => {
     success_url: `${baseApUrl}/success?txn=${trnxid}`,
     fail_url: `${baseApUrl}/fail?txn=${trnxid}`,
     cancel_url: `${baseApUrl}/cancel?txn=${trnxid}`,
-    ipn_url: '${baseApUrl}/ipn',
+    ipn_url: `${baseApUrl}/ipn`,
 
     shipping_method: 'Courier',
     product_name: `Room ${paymentData.roomId}`,
@@ -74,32 +74,43 @@ const initiatePayment = async (paymentData: any, trnxid: string) => {
   return response.data;
 };
 const completeBookingProcess = async (txnId: string) => {
+  // ১. বুকিং ডাটার সাথে ইউজারের জেন্ডারটাও নিয়ে আসো
   const bookingResult = await db.query(
-    'SELECT * FROM bookings WHERE transaction_id = $1',
+    `SELECT b.*, u.gender 
+     FROM bookings b 
+     JOIN users u ON b.user_id = u.id 
+     WHERE b.transaction_id = $1`,
     [txnId]
   );
   const booking = bookingResult.rows[0];
 
   if (!booking) throw new Error('Booking not found');
 
-  // ১. পেমেন্ট স্ট্যাটাস আপডেট
+  // ২. পেমেন্ট স্ট্যাটাস আপডেট
   await db.query(
     'UPDATE bookings SET payment_status = $1 WHERE transaction_id = $2',
     ['paid', txnId]
   );
 
-  // ২. ডেইলি স্ট্যাটাস আপডেট (লুপ)
+  // ৩. ডেইলি স্ট্যাটাস আপডেট (জেন্ডার লকসহ)
   let currentDate = new Date(booking.check_in);
   const endDate = new Date(booking.check_out);
 
   while (currentDate <= endDate) {
     const dateString = currentDate.toISOString().split('T')[0];
 
-    // আপনার DB স্ট্রাকচার অনুযায়ী কলামের নাম পরিবর্তন করা হয়েছে
+    // assigned_gender কলামে ইউজারের জেন্ডার ঢুকিয়ে রুম লক করা হচ্ছে
     await db.query(
-      `INSERT INTO room_daily_status (room_id, bed_id, user_id, booking_date, is_paid) 
-       VALUES ($1, $2, $3, $4, $5)`,
-      [booking.room_id, booking.bed_id, booking.user_id, dateString, true]
+      `INSERT INTO room_daily_status (room_id, bed_id, user_id, booking_date, assigned_gender, is_paid) 
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        booking.room_id,
+        booking.bed_id,
+        booking.user_id,
+        dateString,
+        booking.gender,
+        true,
+      ]
     );
     currentDate.setDate(currentDate.getDate() + 1);
   }
