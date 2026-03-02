@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import fs from 'fs';
+import db from '../../config/db';
 
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
@@ -16,7 +17,7 @@ oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
 const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
-export const uploadFileToDrive = async (file: Express.Multer.File) => {
+const uploadFileToDrive = async (file: Express.Multer.File) => {
   try {
     console.log('--- DEBUG: Starting OAuth Upload ---');
 
@@ -47,4 +48,21 @@ export const uploadFileToDrive = async (file: Express.Multer.File) => {
     }
     throw error;
   }
+};
+export const updateUserDocumentLink = async (
+  email: string,
+  driveLink: string
+) => {
+  const query = `
+    UPDATE users 
+    SET document_url = $1, updated_at = NOW() 
+    WHERE email = $2 
+    RETURNING id, email, document_url
+  `;
+  const result = await db.query(query, [driveLink, email]);
+  return result.rows[0];
+};
+export const docService = {
+  uploadFileToDrive,
+  updateUserDocumentLink,
 };
