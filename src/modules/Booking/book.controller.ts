@@ -56,8 +56,63 @@ const getMyBookings = async (req: Request, res: Response) => {
     });
   }
 };
+
+const getPendingBookings = async (req: Request, res: Response) => {
+  try {
+    const { branch } = req.query;
+
+    if (!branch) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Branch is required' });
+    }
+
+    const result = await bookingServices.getPendingBookings(branch as string);
+
+    res.status(200).json({
+      success: true,
+      message: 'Pending bookings fetched',
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const allowGuestCheckIn = async (req: Request, res: Response) => {
+  try {
+    const { bookingId } = req.body;
+    const result = await bookingServices.permitGuest(bookingId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Guest permitted successfully!',
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getPendingPermits = async (req: Request, res: Response) => {
+  try {
+    const { branch } = req.query;
+    const result = await bookingServices.getPendingPermits(branch as string);
+
+    res.status(200).json({
+      success: true,
+      message: 'Pending permits fetched successfully',
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 export const bookController = {
   bookNPayment,
   paymentSuccess,
   getMyBookings,
+  getPendingBookings,
+  allowGuestCheckIn,
+  getPendingPermits,
 };

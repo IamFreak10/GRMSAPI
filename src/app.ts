@@ -10,6 +10,7 @@ import { docRoutes } from './modules/doc/doc.routes';
 import { mailRoutes } from './modules/mail/email.routes';
 import passport from 'passport';
 import './config/passport.config';
+import { userStatRoutes } from './modules/user-stats/user-stat.routes';
 export const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -45,6 +46,9 @@ app.use('/upload-doc', loger, docRoutes);
 
 // Send email to user
 app.use('/send-reminder', mailRoutes);
+
+// stats
+app.use('/stats', userStatRoutes);
 app.get('/', (req, res) => {
   res.send('GRMS API Root');
 });

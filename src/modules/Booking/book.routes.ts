@@ -10,4 +10,12 @@ router.post('/payment/success', bookController.paymentSuccess);
 // get successful Bookings
 router.get('/my-bookings/:userId', auth('user'), bookController.getMyBookings);
 
+// get pending Bookings
+router.get('/pending', auth('admin'), bookController.getPendingBookings);
+
+// এডমিন এই রাউটে হিট করে এলাউ করবে
+router.patch('/allow-guest', auth('admin'), bookController.allowGuestCheckIn);
+// এডমিন এই রাউটে পেন্ডিং পারমিট লিস্ট দেখবে
+router.get('/pending-permits', auth('admin'), bookController.getPendingPermits);
+
 export const bookRoutes = router;

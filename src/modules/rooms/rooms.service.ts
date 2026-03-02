@@ -1,6 +1,5 @@
 import db from '../../config/db';
 
-
 // Room create
 const createRoom = async (payload: any) => {
   const { roomNo, branch, type, totalBeds, price } = payload;
@@ -17,13 +16,13 @@ const createRoom = async (payload: any) => {
   // ২. বেড জেনারেট করা
   for (let i = 1; i <= totalBeds; i++) {
     const bedLabel = `B${i}`;
-    await db.query(
-      `INSERT INTO beds (room_id, bed_label) VALUES ($1, $2)`,
-      [newRoom.id, bedLabel]
-    );
+    await db.query(`INSERT INTO beds (room_id, bed_label) VALUES ($1, $2)`, [
+      newRoom.id,
+      bedLabel,
+    ]);
   }
 
-  return newRoom; 
+  return newRoom;
 };
 const getRoomStatus = async (date: any, branch: any) => {
   let query = `
@@ -36,7 +35,7 @@ const getRoomStatus = async (date: any, branch: any) => {
           SELECT rds.booking_date, json_agg(rds.bed_id) AS booked_bed_ids, MAX(rds.assigned_gender) AS gender_lock
           FROM room_daily_status rds
           WHERE rds.room_id = r.id
-          ${date ? "AND rds.booking_date = $1" : ""}
+          ${date ? 'AND rds.booking_date = $1' : ''}
           GROUP BY rds.booking_date
         ) rds_sub
       ) AS daily_occupancy
@@ -55,7 +54,31 @@ const getRoomStatus = async (date: any, branch: any) => {
   const result = await db.query(query, params);
   return result.rows;
 };
+
+const getRoomsAndBedsStatus = async (branch: string) => {
+  const query = `
+    SELECT 
+        r.room_no, 
+        r.type, 
+        -- r.gender কলাম নেই, তাই আমরা ইউজারের জেন্ডার নিচ্ছি রুমের কালার দেখানোর জন্য
+        u.gender as gender, 
+        b.bed_label,
+        bk.id as is_occupied,
+        u.name as guest_name
+    FROM rooms r
+    JOIN beds b ON r.id = b.room_id
+    LEFT JOIN bookings bk ON b.id = bk.bed_id 
+        AND CURRENT_DATE BETWEEN bk.check_in AND bk.check_out
+    LEFT JOIN users u ON bk.user_id = u.id
+    WHERE r.branch = $1
+    ORDER BY r.room_no ASC, b.bed_label ASC;
+  `;
+
+  const result = await db.query(query, [branch]);
+  return result.rows;
+};
 export const roomService = {
   createRoom,
-  getRoomStatus
+  getRoomStatus,
+  getRoomsAndBedsStatus,
 };

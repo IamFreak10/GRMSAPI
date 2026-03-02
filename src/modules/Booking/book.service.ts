@@ -154,9 +154,68 @@ const getMyBookings = async (userId: string) => {
   const result = await db.query(query, [userId]);
   return result.rows;
 };
+
+const getPendingBookings = async (branch: string) => {
+  const query = `
+    SELECT 
+        bk.id as booking_id, 
+        u.id as user_id, 
+        u.name, 
+        u.gender, 
+        bk.payment_status,
+        bk.check_in,
+        bk.check_out,
+        r.room_no
+    FROM bookings bk 
+    JOIN users u ON bk.user_id = u.id 
+    JOIN rooms r ON bk.room_id = r.id 
+    WHERE r.branch = $1 
+    -- 'created_at' এর বদলে 'booking_date' ইউজ কর
+    ORDER BY bk.booking_date DESC; 
+  `;
+  const result = await db.query(query, [branch]);
+  return result.rows;
+};
+const getPendingPermits = async (branch: string) => {
+  const query = `
+    SELECT 
+        bk.id as booking_id, 
+        u.name, 
+        u.gender, 
+        u.document_url, -- ভেরিফাই করার জন্য
+        bk.payment_status,
+        bk.check_in,
+        bk.check_out,
+        r.room_no,
+        bk.transaction_id
+    FROM bookings bk 
+    JOIN users u ON bk.user_id = u.id 
+    JOIN rooms r ON bk.room_id = r.id 
+    WHERE r.branch = $1 
+    AND bk.payment_status = 'paid' 
+    AND bk.is_permitted = FALSE 
+    ORDER BY bk.booking_date DESC;
+  `;
+  const result = await db.query(query, [branch]);
+  return result.rows;
+};
+
+const permitGuest = async (bookingId: string) => {
+  const query = `
+    UPDATE bookings 
+    SET is_permitted = TRUE 
+    WHERE id = $1 
+    RETURNING *`;
+
+  const result = await db.query(query, [bookingId]);
+  return result.rows[0];
+};
 export const bookingServices = {
   initiatePayment,
   createBooking,
   completeBookingProcess,
   getMyBookings,
+  getPendingBookings,
+  getPendingPermits,
+  permitGuest,
 };
