@@ -133,23 +133,23 @@ const completeBookingProcess = async (txnId: string) => {
   return { success: true };
 };
 
+// book.service.ts
 const getMyBookings = async (userId: string) => {
   const query = `
     SELECT 
         b.id,
+        b.room_id,     
+        b.bed_id,      
         b.check_in,
         b.check_out,
         b.total_amount,
         b.payment_status,
-        b.transaction_id,
-        b.booking_date,
         r.room_no,
-        r.branch,
-        r.type as room_type
+        r.branch
     FROM bookings b
     JOIN rooms r ON b.room_id = r.id
     WHERE b.user_id = $1
-    ORDER BY b.booking_date DESC`;
+    ORDER BY b.id DESC`;
 
   const result = await db.query(query, [userId]);
   return result.rows;
@@ -162,15 +162,17 @@ const getPendingBookings = async (branch: string) => {
         u.id as user_id, 
         u.name, 
         u.gender, 
+        u.document_url,      
         bk.payment_status,
+        bk.is_permitted,     
         bk.check_in,
         bk.check_out,
-        r.room_no
+        r.room_no,
+        bk.transaction_id
     FROM bookings bk 
     JOIN users u ON bk.user_id = u.id 
     JOIN rooms r ON bk.room_id = r.id 
     WHERE r.branch = $1 
-    -- 'created_at' এর বদলে 'booking_date' ইউজ কর
     ORDER BY bk.booking_date DESC; 
   `;
   const result = await db.query(query, [branch]);
@@ -200,6 +202,60 @@ const getPendingPermits = async (branch: string) => {
   return result.rows;
 };
 
+const getAllRoomsWithStatus = async (branch: string) => {
+  const query = `
+    SELECT 
+        r.room_no as "roomNo",
+        r.type as "type",          -- ডায়াগ্রাম অনুযায়ী r.type
+        'neutral' as "roomGender", -- rooms টেবিলে gender নেই
+        b.id as "bedId",
+        b.bed_label as "bedLabel", -- তোর ডায়াগ্রামে bed_label আছে
+        -- বুকিং থাকলে occupied true, না থাকলে false
+        CASE WHEN bk.id IS NOT NULL THEN true ELSE false END as "occupied",
+        u.name as "guestName",
+        -- ডায়াগ্রামে না থাকলেও তোর সার্ভিসে তুই এই কলামটা ইউজ করছিস
+        COALESCE(bk.is_permitted, false) as "is_permitted" 
+    FROM rooms r
+    LEFT JOIN beds b ON r.id = b.room_id
+    LEFT JOIN bookings bk ON b.id = bk.bed_id 
+        AND bk.payment_status = 'paid' 
+        AND CURRENT_DATE BETWEEN bk.check_in AND bk.check_out -- আজকের স্ট্যাটাস
+    LEFT JOIN users u ON bk.user_id = u.id
+    WHERE r.branch = $1
+    ORDER BY r.room_no, b.id;
+  `;
+
+  const result = await db.query(query, [branch]);
+  const rows = result.rows;
+
+  // ডাটা গ্রুপিং লজিক
+  const floorData = rows.reduce((acc: any[], row: any) => {
+    let room = acc.find((r) => r.roomNo === row.roomNo);
+
+    if (!room) {
+      room = {
+        roomNo: row.roomNo,
+        type: row.type,
+        gender: row.roomGender,
+        beds: [],
+      };
+      acc.push(room);
+    }
+
+    if (row.bedId) {
+      room.beds.push({
+        id: row.bedLabel || row.bedId, // bed_label থাকলে সেটা দেখাবে
+        occupied: row.occupied,
+        guest: row.guestName || null,
+        is_permitted: row.is_permitted,
+      });
+    }
+
+    return acc;
+  }, []);
+
+  return floorData;
+};
 const permitGuest = async (bookingId: string) => {
   const query = `
     UPDATE bookings 
@@ -218,4 +274,5 @@ export const bookingServices = {
   getPendingBookings,
   getPendingPermits,
   permitGuest,
+  getAllRoomsWithStatus,
 };

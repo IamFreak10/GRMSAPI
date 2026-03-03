@@ -18,4 +18,7 @@ router.patch('/allow-guest', auth('admin'), bookController.allowGuestCheckIn);
 // এডমিন এই রাউটে পেন্ডিং পারমিট লিস্ট দেখবে
 router.get('/pending-permits', auth('admin'), bookController.getPendingPermits);
 
+// get all rooms status for admin only book.routes.ts
+router.get('/all-rooms-status', auth('admin'), bookController.getAllRooms);
+
 export const bookRoutes = router;

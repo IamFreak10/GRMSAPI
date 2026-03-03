@@ -108,6 +108,38 @@ const getPendingPermits = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+const getAllRooms = async (req: Request, res: Response) => {
+  try {
+    const { branch } = req.query;
+
+    if (!branch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Branch name is required',
+      });
+    }
+
+   
+    const floorData = await bookingServices.getAllRoomsWithStatus(
+      branch as string
+    );
+
+    // ফ্রন্টএন্ডে রেসপন্স পাঠানো
+    return res.status(200).json({
+      success: true,
+      message: 'Room map data fetched successfully',
+      data: floorData, // এটাই তোর floorData হিসেবে ফ্রন্টএন্ডে যাবে
+    });
+  } catch (error: any) {
+    console.error('Error in getAllRooms Controller:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+      error: error.message,
+    });
+  }
+};
 export const bookController = {
   bookNPayment,
   paymentSuccess,
@@ -115,4 +147,5 @@ export const bookController = {
   getPendingBookings,
   allowGuestCheckIn,
   getPendingPermits,
+  getAllRooms,
 };
