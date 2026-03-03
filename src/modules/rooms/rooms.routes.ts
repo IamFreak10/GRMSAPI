@@ -11,7 +11,11 @@ router.get(
 );
 
 // Get Room data by date and all status for both admin and user
-router.get('/all-rooms', auth('admin'), roomController.getRoomInventory);
+router.get(
+  '/all-rooms',
+  auth('admin', 'user'),
+  roomController.getRoomInventory
+);
 
 // Add a new room,admin only
 router.post('/', auth('admin'), loger, roomController.createRoom);

@@ -21,4 +21,11 @@ router.get('/pending-permits', auth('admin'), bookController.getPendingPermits);
 // get all rooms status for admin only book.routes.ts
 router.get('/all-rooms-status', auth('admin'), bookController.getAllRooms);
 
+// !ADMIN ONLY
+router.patch('/check-in', auth('admin'), bookController.handleCheckIn);
+// !ADMIN ONLY
+router.patch('/check-out', auth('admin'), bookController.handleCheckOut);
+// !ADMIN ONLY
+router.get('/all-bookings-for-admin', auth('admin'), bookController.getAllBookings);
+
 export const bookRoutes = router;

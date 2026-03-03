@@ -60,7 +60,7 @@ const getRoomsAndBedsStatus = async (branch: string) => {
     SELECT 
         r.room_no, 
         r.type, 
-        -- r.gender কলাম নেই, তাই আমরা ইউজারের জেন্ডার নিচ্ছি রুমের কালার দেখানোর জন্য
+        -- r.gender 
         u.gender as gender, 
         b.bed_label,
         bk.id as is_occupied,

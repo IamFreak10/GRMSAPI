@@ -120,7 +120,6 @@ const getAllRooms = async (req: Request, res: Response) => {
       });
     }
 
-   
     const floorData = await bookingServices.getAllRoomsWithStatus(
       branch as string
     );
@@ -140,6 +139,65 @@ const getAllRooms = async (req: Request, res: Response) => {
     });
   }
 };
+
+const handleCheckIn = async (req: Request, res: Response) => {
+  try {
+    const { bookingId } = req.body;
+
+    if (!bookingId) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'মামা, বুকিং আইডি কই?' });
+    }
+
+    const result = await bookingServices.checkInGuest(bookingId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Guest Checked-In Successfully!',
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const handleCheckOut = async (req: Request, res: Response) => {
+  try {
+    const { bookingId } = req.body;
+
+    if (!bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: 'বুকিং আইডি ছাড়া চেক-আউট কেমনে করমু?',
+      });
+    }
+
+    const result = await bookingServices.checkOutGuest(bookingId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Guest Checked-Out! Bed is now free.',
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getAllBookings = async (req: Request, res: Response) => {
+  try {
+    const result = await bookingServices.getAllBookingsForAdmin();
+    
+    res.status(200).json({
+      success: true,
+      message: 'মামা সব বুকিং লিস্ট চলে আসছে!',
+      data: result
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 export const bookController = {
   bookNPayment,
   paymentSuccess,
@@ -148,4 +206,7 @@ export const bookController = {
   allowGuestCheckIn,
   getPendingPermits,
   getAllRooms,
+  handleCheckIn,
+  handleCheckOut,
+  getAllBookings
 };

@@ -202,6 +202,32 @@ const getPendingPermits = async (branch: string) => {
   return result.rows;
 };
 
+// book.service.ts
+
+const checkInGuest = async (bookingId: string) => {
+  const query = `
+    UPDATE bookings 
+    SET status = 'active', 
+        actual_check_in = CURRENT_TIMESTAMP 
+    WHERE id = $1 
+    RETURNING *`;
+
+  const result = await db.query(query, [bookingId]);
+  return result.rows[0];
+};
+
+const checkOutGuest = async (bookingId: string) => {
+  const query = `
+    UPDATE bookings 
+    SET status = 'completed', 
+        actual_check_out = CURRENT_TIMESTAMP 
+    WHERE id = $1 
+    RETURNING *`;
+
+  const result = await db.query(query, [bookingId]);
+  return result.rows[0];
+};
+
 const getAllRoomsWithStatus = async (branch: string) => {
   const query = `
     SELECT 
@@ -266,6 +292,32 @@ const permitGuest = async (bookingId: string) => {
   const result = await db.query(query, [bookingId]);
   return result.rows[0];
 };
+
+const getAllBookingsForAdmin = async () => {
+  const query = `
+    SELECT 
+        bk.id, 
+        bk.status, 
+        bk.is_permitted, 
+        bk.check_in, 
+        bk.check_out, 
+        bk.payment_status,
+        bk.transaction_id, 
+        r.room_no, 
+        r.branch, 
+        u.name as guest_name,
+        u.email,
+        u.gender,
+        u.phone 
+    FROM bookings bk
+    JOIN rooms r ON bk.room_id = r.id
+    JOIN users u ON bk.user_id = u.id
+    ORDER BY bk.id DESC;
+  `;
+
+  const result = await db.query(query);
+  return result.rows;
+};
 export const bookingServices = {
   initiatePayment,
   createBooking,
@@ -275,4 +327,7 @@ export const bookingServices = {
   getPendingPermits,
   permitGuest,
   getAllRoomsWithStatus,
+  checkInGuest,
+  checkOutGuest,
+  getAllBookingsForAdmin,
 };
