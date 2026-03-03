@@ -142,6 +142,7 @@ const getMyBookings = async (userId: string) => {
         b.bed_id,      
         b.check_in,
         b.check_out,
+        b.transaction_id,
         b.total_amount,
         b.payment_status,
         r.room_no,

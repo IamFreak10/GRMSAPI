@@ -14,7 +14,7 @@ const createUser = async (payload: IUserPayload) => {
     photo_url,
   } = payload;
 
-  // Hash password
+  
   const hashedPassword = await bcrypT.hash(password, 10);
 
   try {

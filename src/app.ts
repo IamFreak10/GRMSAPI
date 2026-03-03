@@ -11,6 +11,7 @@ import { mailRoutes } from './modules/mail/email.routes';
 import passport from 'passport';
 import './config/passport.config';
 import { userStatRoutes } from './modules/user-stats/user-stat.routes';
+import { adminStatsRoutes } from './modules/admin-stats/adminStats.routes';
 export const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -19,7 +20,7 @@ app.use(express.json());
 // app.use(express.json()) এর ঠিক নিচে এটি যোগ করুন
 app.use((req, res, next) => {
   console.log(`Incoming Request: ${req.method} ${req.url}`);
-  console.log('Body:', req.body); // এখানে দেখতে পারবেন ডাটা আসছে কি না
+  console.log('Body:', req.body);
   next();
 });
 app.use(
@@ -49,6 +50,10 @@ app.use('/send-reminder', mailRoutes);
 
 // stats
 app.use('/stats', userStatRoutes);
+
+// stats-of-admin
+
+app.use('/admin-stats', adminStatsRoutes);
 app.get('/', (req, res) => {
   res.send('GRMS API Root');
 });

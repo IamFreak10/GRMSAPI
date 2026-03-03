@@ -27,10 +27,10 @@ const userPost = async (req: Request, res: Response) => {
 
 const getMe = async (req: Request, res: Response) => {
   try {
-    // তোর মিডলওয়্যার decodedToken টা req.user এ রাখছে
+    
     const user = (req as any).user;
 
-    // টোকেন থেকে ইমেইল নিয়ে ডাটাবেস থেকে ফ্রেশ ডাটা আনা ভালো
+    
     const result = await userService.getMyProfileByEmail(user.email);
 
     res.status(200).json({
